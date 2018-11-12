@@ -258,7 +258,7 @@ public abstract class DataEndpoint {
     /**
      * Event Publisher worker thread to actually sends the events to the endpoint.
      */
-    class EventPublisher implements Runnable {
+    public class EventPublisher implements Runnable {
         List<Event> events;
 
         public EventPublisher(List<Event> events) {

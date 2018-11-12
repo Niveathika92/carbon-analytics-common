@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.databridge.agent.endpoint;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,6 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class EventPublisherThreadPoolExecutor extends ThreadPoolExecutor {
+    private static Log log = LogFactory.getLog(EventPublisherThreadPoolExecutor.class);
 
     private final Semaphore semaphore;
 
@@ -38,6 +41,7 @@ public class EventPublisherThreadPoolExecutor extends ThreadPoolExecutor {
     public void execute(final Runnable task) {
         boolean acquired = false;
         do {
+            log.info("Thread tries to acquire.."  );
             try {
                 semaphore.acquire();
                 acquired = true;
@@ -45,12 +49,15 @@ public class EventPublisherThreadPoolExecutor extends ThreadPoolExecutor {
                 // Do nothing
             }
         } while (!acquired);
+        log.info("Thread acquired semaphore lock.");
         super.execute(task);
     }
 
     public void submitJobAndSetState(Thread thread, DataEndpoint dataEndpoint) {
         int permits = semaphore.availablePermits();
+        log.info("Available Permits : '" + permits + "'");
         if (permits <= 1){
+            log.info("Turned to busy");
             dataEndpoint.setState(DataEndpoint.State.BUSY);
         }
         submit(thread);
